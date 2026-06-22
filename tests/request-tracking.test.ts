@@ -156,4 +156,18 @@ describe("handleMessageEnd", () => {
     handleMessageEnd({ message: makeAssistantMessage() } as any, ctx, session, 100);
     assert.ok(ctx.logs.some((l) => l.includes("$")));
   });
+
+  it("defaults missing usage token fields to zero", () => {
+    const ctx = createMockContext({ hasUI: true });
+    const session = createSessionState();
+    session.currentTask = createTaskState(0);
+    session.currentRequest = createActiveRequest(0);
+    const msg = makeAssistantMessage();
+    msg.usage = { cost: msg.usage.cost } as any;
+    handleMessageEnd({ message: msg } as any, ctx, session, 100);
+    assert.strictEqual(session.currentTask.usage.output, 0);
+    assert.strictEqual(session.currentTask.usage.input, 0);
+    assert.strictEqual(session.currentTask.usage.totalTokens, 0);
+    assert.ok(!Number.isNaN(session.currentTask.usage.totalTokens));
+  });
 });

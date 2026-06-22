@@ -36,10 +36,10 @@ export function handleMessageEnd(
 
   const elapsedMs = Math.max(0, now - request.startTime);
 
-  const output = msg.usage.output;
-  const input = msg.usage.input;
-  const cacheRead = msg.usage.cacheRead;
-  const cacheWrite = msg.usage.cacheWrite;
+  const output = msg.usage.output ?? 0;
+  const input = msg.usage.input ?? 0;
+  const cacheRead = msg.usage.cacheRead ?? 0;
+  const cacheWrite = msg.usage.cacheWrite ?? 0;
   const totalTokens = msg.usage.totalTokens ?? input + output + cacheRead + cacheWrite;
   const cost = msg.usage.cost;
   const toolCount = getToolCallCount(msg);
