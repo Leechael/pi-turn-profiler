@@ -350,8 +350,11 @@ describe("turnProfilerExtension lifecycle", () => {
       assert.ok(record.toolWallMs > 0);
       assert.ok(record.toolSumMs > 0);
 
-      assert.ok(logs.some((line) => line.includes("#1") && line.includes("5 out")));
-      assert.ok(logs.some((line) => line.includes("actual-model")));
+      assert.strictEqual(
+        logs.filter((line) => line.includes("#1") && line.includes("5 out")).length,
+        0,
+        "notify should be silent in non-TUI mode",
+      );
 
       const command = commands.get("tps");
       assert.ok(command);

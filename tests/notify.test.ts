@@ -4,7 +4,7 @@ import { notify, notifyError } from "../src/notify.ts";
 import { createMockContext, mockConsole } from "./mocks.ts";
 
 describe("notify", () => {
-  it("writes to console.log in non-TUI mode", () => {
+  it("is silent in non-TUI mode", () => {
     const ctx = createMockContext({ hasUI: false });
     const logs: string[] = [];
     const { restore } = mockConsole(logs, []);
@@ -13,7 +13,7 @@ describe("notify", () => {
     } finally {
       restore();
     }
-    assert.deepStrictEqual(logs, ["hello"]);
+    assert.deepStrictEqual(logs, []);
   });
 
   it("uses UI notify in TUI mode", () => {
