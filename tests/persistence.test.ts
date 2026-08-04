@@ -30,6 +30,14 @@ function makeRecord(ts: string) {
   };
 }
 
+function localDay(ts: string): string {
+  const d = new Date(ts);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 describe("persistence", () => {
   let agentDir: string;
   let previousAgentDir: string | undefined;
@@ -56,15 +64,17 @@ describe("persistence", () => {
     assert.ok(stat.isDirectory());
   });
 
-  it("writes records grouped by day", () => {
+  it("writes records grouped by local day", () => {
     writeTpsRecord(makeRecord("2026-06-22T10:00:00.000Z"));
     writeTpsRecord(makeRecord("2026-06-22T11:00:00.000Z"));
     writeTpsRecord(makeRecord("2026-06-23T00:00:00.000Z"));
 
+    const dayA = localDay("2026-06-22T10:00:00.000Z");
+    const dayB = localDay("2026-06-23T00:00:00.000Z");
     const files = readdirSync(join(agentDir, "tps")).filter((f) => f.endsWith(".jsonl"));
-    assert.deepStrictEqual(files.sort(), ["tps-2026-06-22.jsonl", "tps-2026-06-23.jsonl"]);
+    assert.deepStrictEqual(files.sort(), [`tps-${dayA}.jsonl`, `tps-${dayB}.jsonl`]);
 
-    const day22 = readFileSync(join(agentDir, "tps", "tps-2026-06-22.jsonl"), "utf8")
+    const day22 = readFileSync(join(agentDir, "tps", `tps-${dayA}.jsonl`), "utf8")
       .trim()
       .split("\n");
     assert.strictEqual(day22.length, 2);

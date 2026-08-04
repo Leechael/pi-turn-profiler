@@ -31,8 +31,16 @@ export function ensureTpsDir(): string {
   return dir;
 }
 
+function formatLocalDay(ts: string): string {
+  const d = new Date(ts);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 export function writeTpsRecord(record: TpsRecord): void {
   const dir = ensureTpsDir();
-  const day = record.ts.slice(0, 10);
+  const day = formatLocalDay(record.ts);
   appendFileSync(join(dir, `tps-${day}.jsonl`), JSON.stringify(record) + "\n");
 }
