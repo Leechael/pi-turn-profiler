@@ -7,6 +7,7 @@ import {
   formatCost,
   getOrCreateModelStats,
   getToolCallCount,
+  isRateLimitError,
 } from "./util.ts";
 import { notify } from "./notify.ts";
 import type { ActiveRequest, SessionState, UsageTotals } from "./util.ts";
@@ -54,8 +55,14 @@ export function handleMessageEnd(
     cost,
   };
 
+  const rateLimited = msg.stopReason === "error" && isRateLimitError(msg.errorMessage);
+
   const task = session.currentTask;
   if (task) {
+    if (rateLimited) {
+      task.retries429 += 1;
+      task.retryWaitMs += elapsedMs;
+    }
     task.requestCount += 1;
     task.apiTimeMs += elapsedMs;
     if (request.responseTime !== undefined) {
@@ -71,6 +78,9 @@ export function handleMessageEnd(
   ms.requestCount += 1;
   ms.toolCount += toolCount;
   ms.apiTimeMs += elapsedMs;
+  if (rateLimited) {
+    ms.retries429 += 1;
+  }
   addUsage(ms.usage, usageEntry);
 
   const reqInputTotal = input + cacheRead;
