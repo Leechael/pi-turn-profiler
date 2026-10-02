@@ -27,6 +27,8 @@ function makeRecord(ts: string) {
     wallMs: 450,
     toolWallMs: 0,
     toolSumMs: 0,
+    r429: 0,
+    r429Ms: 0,
   };
 }
 

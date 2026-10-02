@@ -25,6 +25,7 @@ describe("handleTpsCommand", () => {
       requestCount: 1,
       toolCount: 0,
       apiTimeMs: 1000,
+      retries429: 0,
       usage: task.usage,
     });
 

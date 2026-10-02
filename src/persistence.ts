@@ -21,6 +21,8 @@ export interface TpsRecord {
   wallTps: number;
   apiMs: number;
   wallMs: number;
+  r429: number;
+  r429Ms: number;
   toolWallMs: number;
   toolSumMs: number;
 }

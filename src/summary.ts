@@ -39,12 +39,17 @@ export function handleAgentEnd(
   const hitColor = cacheHitColor(cacheHitRate);
   const modelId = getTaskModelId(task, ctx.model?.id ?? "unknown");
 
+  let execLine = `${t.bold("Exec")}  req ${task.requestCount.toLocaleString()}  tools ${task.toolCount.toLocaleString()}  tool wall ${formatTime(task.toolWallMs)}  tool sum ${formatTime(task.toolSumMs)}`;
+  if (task.retries429 > 0) {
+    execLine += `  ${t.fg("warning", `429 ×${task.retries429}`)} wait ${formatTime(task.retryWaitMs)}`;
+  }
+
   session.lastColoredLines = [
     `${t.bold("TPS")}   ${t.fg("accent", formatTps(apiTps))} tok/s API  ${t.fg("accent", formatTps(wallTps))} tok/s wall  ${t.fg("dim", modelId)}`,
     `${t.bold("Token")} out ${t.fg("accent", u.output.toLocaleString())}  in ${u.input.toLocaleString()}  total ${u.totalTokens.toLocaleString()}`,
     `${t.bold("Cache")} r ${u.cacheRead.toLocaleString()} / w ${u.cacheWrite.toLocaleString()}  hit ${t.fg(hitColor, `${cacheHitRate.toFixed(1)}%`)}`,
     `${t.bold("Time")}  api ${formatTime(task.apiTimeMs)}  wait avg ${t.fg("dim", formatTime(avgWaitMs))}  wall ${formatTime(wallMs)}`,
-    `${t.bold("Exec")}  req ${task.requestCount.toLocaleString()}  tools ${task.toolCount.toLocaleString()}  tool wall ${formatTime(task.toolWallMs)}  tool sum ${formatTime(task.toolSumMs)}`,
+    execLine,
   ];
 
   if (u.cost.total > 0) {
@@ -88,6 +93,8 @@ export function handleAgentEnd(
       wallTps: Math.round(wallTps * 100) / 100,
       apiMs: Math.round(task.apiTimeMs),
       wallMs: Math.round(wallMs),
+      r429: task.retries429,
+      r429Ms: Math.round(task.retryWaitMs),
       toolWallMs: Math.round(task.toolWallMs),
       toolSumMs: Math.round(task.toolSumMs),
     });
