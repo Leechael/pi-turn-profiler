@@ -31,6 +31,8 @@ export interface TaskState {
   toolCount: number;
   toolSumMs: number;
   toolWallMs: number;
+  retries429: number;
+  retryWaitMs: number;
   activeToolWallStart?: number;
   activeTools: Map<string, number>;
   usage: UsageTotals;
@@ -41,6 +43,7 @@ export interface SessionModelStats {
   requestCount: number;
   toolCount: number;
   apiTimeMs: number;
+  retries429: number;
   usage: UsageTotals;
 }
 
@@ -78,6 +81,8 @@ export function createTaskState(startTime: number): TaskState {
     toolCount: 0,
     toolSumMs: 0,
     toolWallMs: 0,
+    retries429: 0,
+    retryWaitMs: 0,
     activeTools: new Map(),
     usage: emptyUsage(),
     modelIds: new Set(),
@@ -157,6 +162,11 @@ export function addUsage(target: UsageTotals, usage: UsageTotals): void {
   target.cost.total += usage.cost.total ?? 0;
 }
 
+/** Matches the rate-limit subset of pi's retryable-error detection. */
+export function isRateLimitError(errorMessage: string | undefined): boolean {
+  return /429|rate.?limit|too many requests/i.test(errorMessage ?? "");
+}
+
 export function getToolCallCount(message: { content?: Array<{ type?: string }> }): number {
   return message.content?.filter((c) => c.type === "toolCall").length ?? 0;
 }
@@ -167,7 +177,7 @@ export function getOrCreateModelStats(
 ): SessionModelStats {
   let s = stats.get(modelId);
   if (!s) {
-    s = { requestCount: 0, toolCount: 0, apiTimeMs: 0, usage: emptyUsage() };
+    s = { requestCount: 0, toolCount: 0, apiTimeMs: 0, retries429: 0, usage: emptyUsage() };
     stats.set(modelId, s);
   }
   return s;
