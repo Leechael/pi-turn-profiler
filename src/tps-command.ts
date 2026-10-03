@@ -27,6 +27,7 @@ export function handleTpsCommand(
       const hit = ti > 0 ? (s.usage.cacheRead / ti) * 100 : 0;
       const tps = s.apiTimeMs > 0 ? s.usage.output / (s.apiTimeMs / 1000) : 0;
       let line = `req ${s.requestCount}  out ${s.usage.output.toLocaleString()}  cache ${hit.toFixed(1)}%  ${formatTps(tps)} tok/s`;
+      if (s.retries429 > 0) line += `  429 x${s.retries429}`;
       if (s.usage.cost.total > 0) line += `  ${formatCost(s.usage.cost.total)}`;
       titleParts.push(`  ${mid}`);
       titleParts.push(`    ${line}`);
